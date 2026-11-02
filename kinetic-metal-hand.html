@@ -1,0 +1,1125 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kinetic Metal — Hand</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#e6e4df;--panel:#fbfbfa;--ink:#111;--mute:#8b8b88;--line:#e4e3df;--acc:#111;--red:#ff2b2b}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);color:var(--ink);font-family:"Inter Tight",system-ui,sans-serif;font-size:11px;overflow:hidden;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+header{height:38px;display:flex;align-items:center;gap:18px;padding:0 16px;background:var(--panel);border-bottom:1px solid var(--line);font-size:10px;letter-spacing:.06em;text-transform:uppercase;font-weight:600}
+header .logo{font-weight:800;letter-spacing:.02em;font-size:11px}
+header .sep{width:1px;height:14px;background:var(--line)}
+header .stat{color:var(--mute);font-weight:500}
+header .sp{flex:1}
+main{display:flex;height:calc(100% - 38px)}
+#stage{flex:1;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
+#gl,#ov{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%)}
+#gl{box-shadow:0 0 0 1px rgba(0,0,0,.06)}
+#ov{cursor:crosshair;touch-action:none}
+#hint{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;pointer-events:none}
+#hint .big{pointer-events:auto;background:var(--ink);color:#fff;padding:13px 22px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;font-size:11px}
+#hint .sm{color:#555;font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:rgba(255,255,255,.7);padding:4px 8px}
+#toast{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);background:#111;color:#fff;padding:7px 12px;font-size:10px;letter-spacing:.05em;text-transform:uppercase;opacity:0;transition:opacity .25s;pointer-events:none;max-width:80%;text-align:center}
+#recbadge{position:absolute;top:14px;left:14px;display:none;align-items:center;gap:7px;background:#111;color:#fff;padding:6px 10px;font-weight:600;font-size:10px;letter-spacing:.08em}
+#recbadge i{width:8px;height:8px;border-radius:50%;background:var(--red);animation:bl 1s infinite}
+@keyframes bl{50%{opacity:.25}}
+aside{width:300px;background:var(--panel);border-left:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
+aside.hide{display:none}
+.ttl{padding:14px 16px 12px;border-bottom:1px solid var(--line)}
+.ttl small{color:var(--mute);font-size:9px;letter-spacing:.08em;text-transform:uppercase}
+.ttl h1{font-size:21px;font-weight:800;letter-spacing:-.01em;text-transform:uppercase;line-height:1.05;margin-top:3px}
+.ttl p{color:var(--mute);font-size:10px;margin-top:4px}
+#pbody{flex:1;overflow-y:auto;padding:0 16px 10px}
+#pbody::-webkit-scrollbar{width:4px}#pbody::-webkit-scrollbar-thumb{background:#ccc}
+.sec{padding:12px 0 10px;border-bottom:1px solid var(--line)}
+.sec-t{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:9px}
+.row{margin-bottom:9px}
+.lab{display:flex;justify-content:space-between;font-size:9px;letter-spacing:.07em;text-transform:uppercase;color:#444;font-weight:500;margin-bottom:3px}
+.lab b{font-weight:500;color:var(--mute);font-variant-numeric:tabular-nums}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:14px;background:transparent;display:block}
+input[type=range]::-webkit-slider-runnable-track{height:1px;background:#111}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:9px;height:9px;background:#111;margin-top:-4px;border:0}
+input[type=range]::-moz-range-track{height:1px;background:#111}
+input[type=range]::-moz-range-thumb{width:9px;height:9px;background:#111;border:0;border-radius:0}
+.seg{display:flex;border:1px solid #d9d8d4}
+.seg button{flex:1;padding:6px 2px;font-size:9px;letter-spacing:.07em;text-transform:uppercase;font-weight:600;color:#555}
+.seg button+button{border-left:1px solid #d9d8d4}
+.seg button.on{background:#111;color:#fff}
+.cols{display:flex;gap:6px}
+.col{flex:1}
+.col .sw{position:relative;height:22px;border:1px solid #d9d8d4}
+.col .sw input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
+.col .hex{width:100%;border:0;border-bottom:1px solid var(--line);font:inherit;font-size:9px;padding:3px 0;text-transform:uppercase;background:none;letter-spacing:.04em}
+.col .cl{font-size:8px;letter-spacing:.08em;color:var(--mute);text-transform:uppercase;margin-top:3px}
+.presets{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:10px}
+.presets button{height:34px;border:1px solid #d9d8d4;position:relative;overflow:hidden}
+.presets button span{position:absolute;left:3px;bottom:2px;font-size:7px;letter-spacing:.06em;text-transform:uppercase;font-weight:700;mix-blend-mode:difference;color:#fff}
+.presets button.on{outline:2px solid #111;outline-offset:1px}
+.chk{display:flex;align-items:center;gap:7px;font-size:9px;letter-spacing:.07em;text-transform:uppercase;font-weight:500;cursor:pointer;margin:2px 0 8px}
+.chk input{accent-color:#111;width:12px;height:12px}
+select{width:100%;font:inherit;font-size:10px;padding:5px 4px;border:1px solid #d9d8d4;background:#fff}
+.btn{width:100%;padding:9px;background:#111;color:#fff;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:600}
+.btn.ghost{background:none;color:#111;border:1px solid #d9d8d4}
+.btn.rec.on{background:var(--red)}
+.note{font-size:9px;color:var(--mute);line-height:1.4;margin-top:4px}
+.foot{border-top:1px solid var(--line);padding:10px 16px 12px;display:flex;flex-direction:column;gap:6px}
+.frow{display:flex;gap:6px}
+.frow>*{flex:1}
+#recs{max-height:92px;overflow:auto;display:flex;flex-direction:column;gap:3px}
+#recs a{display:flex;justify-content:space-between;font-size:9px;letter-spacing:.05em;text-transform:uppercase;color:#111;text-decoration:none;border-bottom:1px solid var(--line);padding:3px 0}
+#recs a b{font-weight:500;color:var(--mute)}
+.keys{font-size:8.5px;color:var(--mute);letter-spacing:.06em;text-transform:uppercase;line-height:1.5}
+#vid{position:absolute;width:2px;height:2px;opacity:0;pointer-events:none}
+</style>
+</head>
+<body>
+<header>
+  <span class="stat" id="stCam">CAM —</span>
+  <span class="stat" id="stOut">OUT —</span>
+  <span class="stat" id="stFps">— FPS</span>
+  <span class="stat" id="stHands">HANDS —</span>
+  <span class="sp"></span>
+  <span class="stat" id="stGpu"></span>
+</header>
+<main>
+  <div id="stage">
+    <canvas id="gl"></canvas>
+    <canvas id="ov"></canvas>
+    <div id="recbadge"><i></i><span id="rectime">00:00</span></div>
+    <div id="hint"><button class="big" id="hintCam">Start camera</button><div class="sm">pinch thumb + index to draw · mouse works too</div></div>
+    <div id="toast"></div>
+  </div>
+  <aside id="panel">
+    <div id="pbody"></div>
+    <div class="foot">
+      <button class="btn rec" id="recBtn">● Record</button>
+      <div class="frow"><button class="btn ghost" id="pngBtn">Download PNG</button><button class="btn ghost" id="clrBtn">Clear</button></div>
+      <label class="chk" style="margin:0"><input type="checkbox" id="pngAlpha" checked>PNG: transparent background</label>
+      <div class="frow"><button class="btn ghost" id="undoBtn">Undo</button><button class="btn ghost" id="redoBtn">Redo</button></div>
+      <div id="recs"></div>
+      <div class="keys">R rec · Z undo · X redo · E eraser · B brush · P png · H panel</div>
+    </div>
+  </aside>
+</main>
+<video id="vid" playsinline muted></video>
+
+<script type="module">
+/* =========================================================
+   KINETIC METAL — HAND
+   Height-field metal brush: each stroke is stamped into a float
+   field as exp(k·height) (log-sum-exp = smooth union → liquid merge),
+   then shaded as posterised chrome on top of the webcam.
+   ========================================================= */
+
+const MP_VER = '0.10.21';
+const MP_URL = `https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@${MP_VER}/vision_bundle.mjs`;
+const MP_WASM = `https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@${MP_VER}/wasm`;
+const MP_MODEL = 'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task';
+
+/* ---------------- params ---------------- */
+const PRESETS = {
+  // metal
+  chrome:  {st:'metal', n:'Chrome',   shadow:'#0a0a0b', mid:'#8b8e94', high:'#f5f5f2', irid:0},
+  black:   {st:'metal', n:'Black',    shadow:'#000000', mid:'#2f3136', high:'#c9cdd4', irid:0},
+  mercury: {st:'metal', n:'Mercury',  shadow:'#26282c', mid:'#b3b7be', high:'#ffffff', irid:0},
+  gold:    {st:'metal', n:'Gold',     shadow:'#2c1802', mid:'#b8892f', high:'#fff2c6', irid:0},
+  rose:    {st:'metal', n:'Rose',     shadow:'#381816', mid:'#c48c7f', high:'#ffe8df', irid:0},
+  copper:  {st:'metal', n:'Copper',   shadow:'#230c02', mid:'#a5572b', high:'#ffd4ab', irid:0},
+  titan:   {st:'metal', n:'Titanium', shadow:'#0a111e', mid:'#5a6e8b', high:'#e7efff', irid:0},
+  holo:    {st:'metal', n:'Holo',     shadow:'#0e0e16', mid:'#9ba1b1', high:'#ffffff', irid:.75},
+  // outline  (mid = fill)
+  oInk:    {st:'outline', n:'Paper',  mid:'#ffffff', lineColor:'#111111'},
+  oRed:    {st:'outline', n:'Red',    mid:'#ff3b2f', lineColor:'#111111'},
+  oLime:   {st:'outline', n:'Lime',   mid:'#c9ff2e', lineColor:'#111111'},
+  oBlack:  {st:'outline', n:'Black',  mid:'#111111', lineColor:'#ffffff'},
+  oBlue:   {st:'outline', n:'Cobalt', mid:'#2b4bff', lineColor:'#f2f0ea'},
+  oPink:   {st:'outline', n:'Pink',   mid:'#ffb3d9', lineColor:'#ff2b6a'},
+  oCream:  {st:'outline', n:'Cream',  mid:'#f3ead7', lineColor:'#b0201b'},
+  oGhost:  {st:'outline', n:'Silver', mid:'#c9cbd0', lineColor:'#2b2c30'},
+  // gloss (merging, glossy)
+  lav:     {st:'gloss', n:'Lavender', shadow:'#5a58a6', mid:'#a3a2e6', high:'#e9e8ff', irid:0},
+  gum:     {st:'gloss', n:'Bubblegum',shadow:'#a2346a', mid:'#f08cbf', high:'#ffe3f1', irid:0},
+  mint:    {st:'gloss', n:'Mint',     shadow:'#2f8a6c', mid:'#8fe3c3', high:'#eafff7', irid:0},
+  butter:  {st:'gloss', n:'Butter',   shadow:'#b08a1e', mid:'#f5d65e', high:'#fff8d6', irid:0},
+  cherry:  {st:'gloss', n:'Cherry',   shadow:'#5c0610', mid:'#d41a2c', high:'#ff9aa4', irid:0},
+  lacquer: {st:'gloss', n:'Lacquer',  shadow:'#000000', mid:'#18181b', high:'#55555c', irid:0},
+  ceramic: {st:'gloss', n:'Ceramic',  shadow:'#9a9a96', mid:'#efeeea', high:'#ffffff', irid:0},
+  pearl:   {st:'gloss', n:'Pearl',    shadow:'#8c8aa0', mid:'#e6e3f0', high:'#ffffff', irid:.35},
+};
+const STYLE_KEYS = ['preset','shadow','mid','high','irid','lineColor','texType','breakSharp','roughness','volume','shine','reflContrast'];
+const styleState = {
+  metal:   {preset:'chrome', shadow:'#0a0a0b', mid:'#8b8e94', high:'#f5f5f2', irid:0, breakSharp:.8, roughness:.3, volume:.8, shine:1, reflContrast:.65},
+  outline: {preset:'oInk', mid:'#ffffff', lineColor:'#111111', roughness:0},
+  gloss:   {preset:'lav', shadow:'#5a58a6', mid:'#a3a2e6', high:'#e9e8ff', irid:0, breakSharp:.12, roughness:0, volume:1, shine:1, reflContrast:.7},
+};
+const P = {
+  // camera
+  camId:'', camMode:'4k', camFps:60, camFit:'fill', camZoom:1, bg:'camera', bgColor:'#e4e1db', camDim:0, mirror:true,
+  // output
+  res:'4k', aspect:'16:9', fps:60, bitrate:40,
+  // hands
+  roles:'both', pinchTh:.30, stabilize:.55, skeleton:false, depthInf:0,
+  // tool
+  mode:'brush', endShape:'wedge',
+  // style
+  style:'metal', lineColor:'#111111', lineW:3, wob:.35, wobSpd:.35, hollow:false, texType:'foam', texAmt:.9, texScale:1, ao:.8,
+  // palette
+  preset:'chrome', shadow:'#0a0a0b', mid:'#8b8e94', high:'#f5f5f2', irid:0,
+  // brush
+  baseWidth:22, widthVar:.5, speedInf:.7, merge:14,
+  // material
+  shine:1, lightAngle:120, lightSpin:0, volume:.8, reflContrast:.65, breakSharp:.8, roughness:.3, grainAnim:false, grit:0, film:0, filmSize:1, dither:0, chroma:0, shadowOp:.35, shadowDist:7,
+  // ends
+  wedgeLen:1.7, edgeSharp:1.6, dropSize:.45,
+  // symmetry / life
+  symmetry:'none', evaporate:0,
+};
+
+/* ---------------- DOM ---------------- */
+const $ = id => document.getElementById(id);
+const cv = $('gl'), ov = $('ov'), video = $('vid'), stage = $('stage');
+const octx = ov.getContext('2d');
+function toast(msg, ms=2200){ const t=$('toast'); t.textContent=msg; t.style.opacity=1; clearTimeout(toast._t); toast._t=setTimeout(()=>t.style.opacity=0, ms); }
+
+/* ---------------- WebGL ---------------- */
+const gl = cv.getContext('webgl2', {alpha:true, premultipliedAlpha:true, preserveDrawingBuffer:true, antialias:false});
+if(!gl){ document.body.innerHTML='<p style="padding:40px">WebGL2 is not available in this browser. Use Chrome.</p>'; throw new Error('no webgl2'); }
+const hasCBF = !!gl.getExtension('EXT_color_buffer_float');
+const hasFB  = !!gl.getExtension('EXT_float_blend');
+const hasLin = !!gl.getExtension('OES_texture_float_linear');
+if(!hasCBF){ toast('Float render targets not supported — use Chrome', 8000); }
+const F32 = hasCBF && hasFB;
+const IFMT = F32 ? gl.RG32F : gl.RG16F, FTYPE = F32 ? gl.FLOAT : gl.HALF_FLOAT;
+const KMAX = F32 ? 80 : 10.5;
+const FFILT = (!F32 || hasLin) ? gl.LINEAR : gl.NEAREST;
+$('stGpu').textContent = F32 ? 'FIELD 32F' : 'FIELD 16F';
+
+function sh(type, src){ const s=gl.createShader(type); gl.shaderSource(s,src); gl.compileShader(s); if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s)+'\n'+src); return s; }
+function prog(vs, fs){ const p=gl.createProgram(); gl.attachShader(p,sh(gl.VERTEX_SHADER,vs)); gl.attachShader(p,sh(gl.FRAGMENT_SHADER,fs)); gl.linkProgram(p); if(!gl.getProgramParameter(p,gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p));
+  const u={}; const n=gl.getProgramParameter(p,gl.ACTIVE_UNIFORMS); for(let i=0;i<n;i++){const nm=gl.getActiveUniform(p,i).name; u[nm]=gl.getUniformLocation(p,nm);} return {p,u}; }
+
+const STAMP_VS = `#version 300 es
+precision highp float;
+layout(location=0) in vec2 aC;
+layout(location=1) in vec3 iA;
+layout(location=2) in vec3 iB;
+layout(location=3) in vec4 iP;
+uniform vec2 uRes; uniform float uReachAdd;
+out vec2 vPos; flat out vec3 vA; flat out vec3 vB; flat out vec4 vP;
+void main(){
+  float reach = max(iA.z, iB.z) + uReachAdd + 2.0;
+  vec2 d = iB.xy - iA.xy; float L = length(d);
+  vec2 dir = L > 1e-4 ? d / L : vec2(1.0, 0.0);
+  vec2 nr = vec2(-dir.y, dir.x);
+  vec2 base = aC.x < 0.0 ? iA.xy : iB.xy;
+  vec2 pos = base + dir * aC.x * reach + nr * aC.y * reach;
+  vPos = pos; vA = iA; vB = iB; vP = iP;
+  gl_Position = vec4(pos.x / uRes.x * 2.0 - 1.0, 1.0 - pos.y / uRes.y * 2.0, 0.0, 1.0);
+}`;
+const STAMP_FS = `#version 300 es
+precision highp float;
+in vec2 vPos; flat in vec3 vA; flat in vec3 vB; flat in vec4 vP;
+uniform float uK, uS, uKmax, uErase;
+out vec4 o;
+vec2 segDR(vec2 p, vec3 a, vec3 b){
+  vec2 ba = b.xy - a.xy; float l2 = dot(ba, ba);
+  float t = l2 > 1e-6 ? clamp(dot(p - a.xy, ba) / l2, 0.0, 1.0) : 0.0;
+  return vec2(length(p - a.xy - ba * t), mix(a.z, b.z, t));
+}
+float prof(vec2 dr){ return dr.x < dr.y ? sqrt(dr.y*dr.y - dr.x*dr.x) : -(dr.x - dr.y) * uS; }
+float dome(vec2 dr){ return dr.x < dr.y ? sqrt(dr.y*dr.y - dr.x*dr.x) : 0.0; }
+void main(){
+  vec2 dr = segDR(vPos, vA, vB);
+  if(uErase > 0.5){
+    float a = 1.0 - smoothstep(dr.y * 0.55, dr.y, dr.x);
+    if(a <= 0.0) discard;
+    o = vec4(a); return;
+  }
+  float v = prof(dr) * uK;
+  if(v < -8.0) discard;
+  float e = exp(min(v, uKmax));
+  float st = dome(dr);
+  if(vP.w > 0.5){
+    vec2 drp = segDR(vPos, vP.xyz, vA);
+    e = max(0.0, e - exp(min(prof(drp) * uK, uKmax)));
+    st = max(0.0, st - dome(drp));
+  }
+  o = vec4(e, st, 0.0, 0.0);
+}`;
+const FS_VS = `#version 300 es
+layout(location=0) in vec2 aC; void main(){ gl_Position = vec4(aC, 0.0, 1.0); }`;
+const FADE_FS = `#version 300 es
+precision mediump float; out vec4 o; void main(){ o = vec4(1.0); }`;
+const COMP_FS = `#version 300 es
+precision highp float;
+uniform sampler2D uF0, uF1, uVid;
+uniform vec2 uRes, uVidScale;
+uniform float uK, uHasVid, uDim, uMirror, uTransparent, uBgMode, uStyle;
+uniform vec3 uBgColor, uC0, uC1, uC2, uLine;
+uniform float uLight, uVol, uRefl, uSharp, uRough, uShine, uIrid, uShadowOp, uShadowDist, uScale, uTime;
+uniform float uSeed, uGrit, uFilm, uFilmSize, uDither, uChroma;
+uniform float uS, uLineW, uWob, uWobSpd, uHollow;
+uniform float uTexType, uTexAmt, uTexScale, uAO;
+const float BAYER[16] = float[16](0.,8.,2.,10.,12.,4.,14.,6.,3.,11.,1.,9.,15.,7.,13.,5.);
+float bayer4(vec2 p){ ivec2 i = ivec2(mod(p, 4.0)); return (BAYER[i.x + i.y * 4] + 0.5) / 16.0; }
+out vec4 o;
+vec2 SF(vec2 fc){ vec2 uv = fc / uRes; return texture(uF0, uv).rg + texture(uF1, uv).rg; }
+float H(vec2 fc){ return log(clamp(SF(fc).r, 1e-12, 1e30)) / uK; }      // merging field (signed, px)
+float G(vec2 fc){ return SF(fc).g; }                                    // stacked field (px)
+float hash(vec2 p){ p = fract(p * vec2(123.34, 456.21)); p += dot(p, p + 45.32); return fract(p.x * p.y); }
+vec2 h2(vec2 p){ p = vec2(dot(p, vec2(127.1, 311.7)), dot(p, vec2(269.5, 183.3))); return fract(sin(p) * 43758.5453); }
+float vnoise(vec2 p){ vec2 i = floor(p), f = fract(p); f = f*f*(3.0-2.0*f);
+  return mix(mix(h2(i).x, h2(i+vec2(1,0)).x, f.x), mix(h2(i+vec2(0,1)).x, h2(i+vec2(1,1)).x, f.x), f.y); }
+float worley(vec2 p){ vec2 i = floor(p), f = fract(p); float d = 8.0;
+  for(int y=-1;y<=1;y++) for(int x=-1;x<=1;x++){ vec2 g = vec2(x,y); vec2 r = g + h2(i+g) - f; d = min(d, dot(r,r)); }
+  return sqrt(d); }
+float texN(vec2 fc){
+  vec2 q = fc / (uTexScale * uScale);
+  if(uTexType < 0.5){                       // foam: stacked bubbles
+    float a = worley(q / 15.0), b = worley(q / 6.5 + 7.3), c = worley(q / 2.6 + 3.1);
+    return (1.0 - a*a) * 0.6 + (1.0 - b*b) * 0.28 + (1.0 - c*c) * 0.12 - 0.55;
+  }
+  // stone: rough fbm
+  float n = vnoise(q/10.0)*0.5 + vnoise(q/4.5)*0.28 + vnoise(q/2.0)*0.14 + vnoise(q/0.9)*0.08;
+  return n - 0.5;
+}
+float GP(vec2 fc){ float g = G(fc); if(uTexAmt <= 0.0 || g <= 0.0) return g;
+  return g + uTexAmt * 7.0 * uScale * texN(fc) * smoothstep(0.0, 5.0 * uScale, g); }
+vec3 bgAt(vec2 p){
+  vec3 bg = uBgColor;
+  if(uHasVid > 0.5 && uBgMode < 1.5){
+    vec2 uv = 0.5 + (p - 0.5) * uVidScale;
+    if(uMirror > 0.5) uv.x = 1.0 - uv.x;
+    bool inside = all(greaterThanEqual(uv, vec2(0.0))) && all(lessThanEqual(uv, vec2(1.0)));
+    vec3 c = inside ? texture(uVid, uv).rgb : uBgColor;
+    if(uBgMode > 0.5) c = vec3(dot(c, vec3(0.299, 0.587, 0.114)));
+    bg = c * (1.0 - uDim);
+  }
+  return bg;
+}
+vec3 palette(float tone, float w){
+  vec3 col = mix(uC0, uC1, smoothstep(0.40 - w, 0.40 + w, tone));
+  return mix(col, uC2, smoothstep(0.69 - w, 0.69 + w, tone));
+}
+void main(){
+  vec2 fc = gl_FragCoord.xy;
+  vec2 ld = vec2(cos(uLight), sin(uLight));
+  vec3 L3 = normalize(vec3(ld * 0.75, 0.66));
+  vec2 gc = floor(fc / max(1.0, floor(uScale + 0.5)));
+  float gritN = 0.0;
+  if(uGrit > 0.0) gritN = (hash(gc * 1.37 + 3.1 + uSeed) - 0.5) * uGrit * 6.0 * uScale;
+  vec2 p = vec2(fc.x, uRes.y - fc.y) / uRes;
+  vec3 bg = bgAt(p);
+  vec3 col = vec3(0.0);
+  float mask = 0.0, ms = 0.0, glen = 1.0, h = 0.0;
+  float isPuff = step(1.5, uStyle) * step(uStyle, 2.5);
+
+  if(uStyle > 0.5 && uStyle < 1.5){
+    // ---------- OUTLINE: flat fill + contour, merging ----------
+    float wob = 0.0;
+    if(uWob > 0.0){
+      vec2 q = fc / (55.0 * uScale);
+      float t = uTime * uWobSpd;
+      float n = vnoise(q + vec2(t, -t * 0.7)) * 0.65 + vnoise(q * 2.3 - vec2(t * 1.3, t)) * 0.35;
+      wob = (n - 0.5) * 2.0 * uWob * 6.0 * uScale * uS;
+    }
+    h = H(fc) + wob + gritN * uS;
+    vec2 g = vec2(H(fc + vec2(1,0)) - H(fc - vec2(1,0)), H(fc + vec2(0,1)) - H(fc - vec2(0,1))) * 0.5;
+    glen = max(length(g), 0.02);
+    float lw = uLineW * uScale * uS;
+    float fill = clamp(h / glen + 0.5, 0.0, 1.0);
+    float outer = clamp((h + lw) / glen + 0.5, 0.0, 1.0);
+    if(uHollow > 0.5){
+      float inner = clamp((h - lw) / glen + 0.5, 0.0, 1.0);
+      mask = outer - inner * 1.0;
+      col = uLine;
+      mask = max(mask, 0.0);
+    } else {
+      mask = outer;
+      col = mix(uLine, uC1, fill);
+    }
+    if(uShadowOp > 0.0 && uShadowDist > 0.0){
+      float hs = H(fc + ld * uShadowDist * uScale) + lw;
+      ms = clamp(hs / glen + 0.5, 0.0, 1.0);
+    }
+  } else if(isPuff > 0.5){
+    // ---------- PUFF: stacked, textured, matte ----------
+    h = GP(fc) + gritN * 0.3;
+    vec2 g = vec2(GP(fc + vec2(1,0)) - GP(fc - vec2(1,0)), GP(fc + vec2(0,1)) - GP(fc - vec2(0,1))) * 0.5;
+    glen = max(length(g), 0.08);
+    mask = clamp((h - 0.4) / glen + 0.5, 0.0, 1.0);
+    vec2 gg = g; float gm = length(gg); if(gm > 25.0) gg *= 25.0 / gm;
+    vec3 n = normalize(vec3(-gg * uVol, 1.0));
+    // ambient occlusion
+    float ao = 0.0, R1 = 9.0 * uScale;
+    for(int i = 0; i < 8; i++){
+      float a = float(i) * 0.785398 + 0.39;
+      vec2 d = vec2(cos(a), sin(a));
+      ao += max(G(fc + d * R1) - h, 0.0) + max(G(fc + d * R1 * 2.2) - h, 0.0) * 0.5;
+    }
+    ao = clamp(ao / (8.0 * R1 * 1.1), 0.0, 1.0);
+    // cast shadow along the light
+    float sh = 0.0;
+    for(int i = 1; i <= 6; i++){
+      float t = float(i) * (2.0 + uShadowDist * 0.6) * uScale;
+      float hh = G(fc + ld * t);
+      sh = max(sh, clamp((hh - h - t * 0.55) / (3.0 * uScale), 0.0, 1.0));
+    }
+    float tone = dot(n, L3) * 0.62 + 0.3;
+    tone += uRefl * 0.12 * (dot(n.xy, ld));
+    float w = mix(0.22, 0.006, uSharp) + fwidth(tone) * 0.6;
+    tone *= 1.0 - ao * uAO * 0.9;
+    tone *= 1.0 - sh * uShadowOp * 0.9;
+    tone += (hash(gc * 0.731 + 17.0 + uSeed) - 0.5) * uRough * 0.45;
+    if(uDither > 0.0){ tone += (bayer4(gc) - 0.5) * uDither * 0.6; w = mix(w, 0.002, uDither); }
+    col = palette(tone, w);
+    vec3 r = vec3(2.0 * n.z * n.xy, 2.0 * n.z * n.z - 1.0);
+    float sp = pow(max(dot(r, L3), 0.0), 18.0) * uShine * 0.6;
+    col = mix(col, uC2, clamp(sp, 0.0, 1.0));
+    // bg: contact AO + cast shadow (computed for h = 0 too)
+    ms = max(sh, ao * uAO * 0.7);
+  } else {
+    // ---------- METAL / GLOSS: merging field ----------
+    h = H(fc) + gritN;
+    vec2 g = vec2(H(fc + vec2(1,0)) - H(fc - vec2(1,0)), H(fc + vec2(0,1)) - H(fc - vec2(0,1))) * 0.5;
+    glen = max(length(g), 0.08);
+    mask = clamp(h / glen + 0.5, 0.0, 1.0);
+    vec2 gg = g; float gm = length(gg); if(gm > 25.0) gg *= 25.0 / gm;
+    vec3 n = normalize(vec3(-gg * uVol, 1.0));
+    vec3 r = vec3(2.0 * n.z * n.xy, 2.0 * n.z * n.z - 1.0);
+    float rl = dot(r.xy, ld);
+    float rt = dot(n.xy, vec2(-ld.y, ld.x));
+    float tone;
+    if(uStyle < 0.5){
+      tone = 0.47 + 0.5 * rl * (1.15 + uRefl * 0.7);
+      tone += uRefl * 0.22 * sin(rl * 9.0 + rt * 4.0);
+      tone += (uShine - 0.5) * 0.12;
+      tone *= mix(1.0, smoothstep(0.05, 0.6, n.z), 0.9);
+    } else {
+      tone = dot(n, normalize(vec3(ld * 0.7, 0.7))) * 0.55 + 0.25;
+      tone *= mix(1.0, smoothstep(0.0, 0.5, n.z), 0.35);
+    }
+    float w = mix(0.22, 0.006, uSharp) + fwidth(tone) * 0.6;
+    tone += (hash(gc * 0.731 + 17.0 + uSeed) - 0.5) * uRough * 0.45;
+    if(uDither > 0.0){ tone += (bayer4(gc) - 0.5) * uDither * 0.6; w = mix(w, 0.002, uDither); }
+    col = palette(tone, w);
+    if(uStyle < 0.5){
+      float sp = pow(max(dot(r, L3), 0.0), 24.0);
+      float spec = smoothstep(0.55 - w, 0.55 + w, sp) * clamp(uShine, 0.0, 1.5);
+      col = mix(col, mix(uC2, vec3(1.0), 0.6), clamp(spec, 0.0, 1.0));
+    } else {
+      // gloss: rim light, softbox streak, hard specular
+      float rim = pow(1.0 - n.z, 2.5);
+      col = mix(col, uC2, rim * 0.45);
+      float box = smoothstep(0.42, 0.47, rl) * (1.0 - smoothstep(0.7, 0.78, rl)) * smoothstep(-0.55, 0.0, -abs(rt));
+      float sp = pow(max(dot(r, L3), 0.0), 70.0);
+      float ws = max(w, 0.02);
+      float spec = (smoothstep(0.5 - ws, 0.5 + ws, sp) + box * uRefl * 0.8) * clamp(uShine, 0.0, 1.5);
+      col = mix(col, vec3(1.0), clamp(spec, 0.0, 1.0));
+    }
+    if(uIrid > 0.0){
+      float hue = rl * 0.6 + n.z * 0.9 + rt * 0.3 + uTime * 0.04;
+      vec3 spc = 0.5 + 0.5 * cos(6.2831 * (hue + vec3(0.0, 0.33, 0.67)));
+      col = mix(col, col * (0.35 + 1.15 * spc), uIrid);
+    }
+    if(uShadowOp > 0.0 && uShadowDist > 0.0){
+      float hs = H(fc + ld * uShadowDist * uScale);
+      ms = smoothstep(-1.2 * uScale, 0.8 * uScale, hs);
+    }
+  }
+
+  float fg = 0.0;
+  if(uFilm > 0.0) fg = (hash(floor(fc / uFilmSize) * 0.913 + 5.0 + uSeed * 1.7) - 0.5) * uFilm * 0.5;
+  vec3 mR = vec3(mask);
+  if(uChroma > 0.0 && uStyle < 1.5 && uHollow < 0.5){
+    vec2 co = vec2(uChroma * uScale, 0.0);
+    float off = uStyle > 0.5 ? uLineW * uScale * uS : 0.0;
+    mR.r = clamp((H(fc + co) + off + gritN) / glen + 0.5, 0.0, 1.0);
+    mR.b = clamp((H(fc - co) + off + gritN) / glen + 0.5, 0.0, 1.0);
+  } else if(uChroma > 0.0 && isPuff > 0.5){
+    vec2 co = vec2(uChroma * uScale, 0.0);
+    mR.r = clamp((GP(fc + co) - 0.4) / glen + 0.5, 0.0, 1.0);
+    mR.b = clamp((GP(fc - co) - 0.4) / glen + 0.5, 0.0, 1.0);
+  }
+  if(uTransparent > 0.5){
+    float a = max(max(mR.r, mR.g), mR.b);
+    a = a + (1.0 - a) * uShadowOp * ms;
+    o = vec4(clamp((col + fg) * mR, 0.0, 1.0), a); return;
+  }
+  bg *= 1.0 - uShadowOp * ms * (1.0 - max(max(mR.r, mR.g), mR.b));
+  o = vec4(clamp(mix(bg, col, mR) + fg, 0.0, 1.0), 1.0);
+}`;
+
+const stampP = prog(STAMP_VS, STAMP_FS);
+const fadeP  = prog(FS_VS, FADE_FS);
+const compP  = prog(FS_VS, COMP_FS);
+
+const quadBuf = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, quadBuf);
+gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
+const instBuf = gl.createBuffer();
+const stampVAO = gl.createVertexArray();
+gl.bindVertexArray(stampVAO);
+gl.bindBuffer(gl.ARRAY_BUFFER, quadBuf); gl.enableVertexAttribArray(0); gl.vertexAttribPointer(0,2,gl.FLOAT,false,0,0);
+gl.bindBuffer(gl.ARRAY_BUFFER, instBuf);
+const STRIDE = 10*4;
+gl.enableVertexAttribArray(1); gl.vertexAttribPointer(1,3,gl.FLOAT,false,STRIDE,0);  gl.vertexAttribDivisor(1,1);
+gl.enableVertexAttribArray(2); gl.vertexAttribPointer(2,3,gl.FLOAT,false,STRIDE,12); gl.vertexAttribDivisor(2,1);
+gl.enableVertexAttribArray(3); gl.vertexAttribPointer(3,4,gl.FLOAT,false,STRIDE,24); gl.vertexAttribDivisor(3,1);
+const fsVAO = gl.createVertexArray();
+gl.bindVertexArray(fsVAO);
+gl.bindBuffer(gl.ARRAY_BUFFER, quadBuf); gl.enableVertexAttribArray(0); gl.vertexAttribPointer(0,2,gl.FLOAT,false,0,0);
+gl.bindVertexArray(null);
+
+const vidTex = gl.createTexture();
+gl.bindTexture(gl.TEXTURE_2D, vidTex);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,1,1,0,gl.RGBA,gl.UNSIGNED_BYTE,new Uint8Array([0,0,0,255]));
+
+function makeField(w,h){
+  const t = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D, t);
+  gl.texImage2D(gl.TEXTURE_2D, 0, IFMT, w, h, 0, gl.RG, FTYPE, null);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, FFILT);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, FFILT);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  const f = gl.createFramebuffer();
+  gl.bindFramebuffer(gl.FRAMEBUFFER, f);
+  gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, t, 0);
+  gl.clearColor(0,0,0,0); gl.clear(gl.COLOR_BUFFER_BIT);
+  gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+  return {t,f};
+}
+function freeField(F){ if(!F) return; gl.deleteTexture(F.t); gl.deleteFramebuffer(F.f); }
+function clearField(F){ gl.bindFramebuffer(gl.FRAMEBUFFER, F.f); gl.viewport(0,0,W,H); gl.clearColor(0,0,0,0); gl.clear(gl.COLOR_BUFFER_BIT); }
+
+/* ---------------- canvas sizing ---------------- */
+let W=0, H=0, SCALE=1, K=.25;
+let committed=null, live=null;
+function outSize(){
+  const short = {fhd:1080, '2k':1440, '4k':2160}[P.res];
+  const [aw,ah] = P.aspect.split(':').map(Number);
+  let w,h; if(aw>=ah){ h=short; w=Math.round(short*aw/ah); } else { w=short; h=Math.round(short*ah/aw); }
+  const mx = gl.getParameter(gl.MAX_TEXTURE_SIZE);
+  const f = Math.min(1, mx/Math.max(w,h));
+  return [Math.round(w*f/2)*2, Math.round(h*f/2)*2];
+}
+function setOutput(){
+  const [w,h] = outSize();
+  if(w===W && h===H) return;
+  W=w; H=h; cv.width=W; cv.height=H;
+  SCALE = Math.min(W,H)/1080; K = .25/SCALE;
+  freeField(committed); freeField(live);
+  committed = makeField(W,H); live = makeField(W,H);
+  rebuild();
+  layout();
+  $('stOut').textContent = `OUT ${W}×${H}`;
+}
+function layout(){
+  const sw = stage.clientWidth-32, shh = stage.clientHeight-32;
+  const s = Math.min(sw/W, shh/H);
+  const cw = Math.floor(W*s), ch = Math.floor(H*s);
+  for(const c of [cv, ov]){ c.style.width=cw+'px'; c.style.height=ch+'px'; }
+  const dpr = devicePixelRatio||1;
+  ov.width = Math.round(cw*dpr); ov.height = Math.round(ch*dpr);
+}
+addEventListener('resize', layout);
+
+/* ---------------- stamping ---------------- */
+function sFromMerge(m){ return Math.min(6, Math.max(.12, 5.545/Math.max(m,.5))); }
+const SYM = {none:[[0,0]], v:[[0,0],[1,0]], h:[[0,0],[0,1]], both:[[0,0],[1,0],[0,1],[1,1]]};
+function strokeXf(st){
+  const sc = Math.min(W,H)/Math.min(st.W,st.H);
+  return {sc, ox:W/2 - st.W/2*sc, oy:H/2 - st.H/2*sc};
+}
+function buildInst(st, from, to){
+  const pts = st.pts, vars = SYM[st.sym]||SYM.none, X = strokeXf(st);
+  const out = new Float32Array(Math.max(0,to-from)*vars.length*10);
+  let o=0;
+  for(const [mx,my] of vars){
+    const fx = q => (mx ? st.W - q.x : q.x)*X.sc + X.ox;
+    const fy = q => (my ? st.H - q.y : q.y)*X.sc + X.oy;
+    for(let i=from;i<to;i++){
+      const b = pts[i], a = i>0 ? pts[i-1] : b, p = i>1 ? pts[i-2] : null;
+      out[o++]=fx(a); out[o++]=fy(a); out[o++]=a.r*X.sc;
+      out[o++]=fx(b); out[o++]=fy(b); out[o++]=b.r*X.sc;
+      if(p){ out[o++]=fx(p); out[o++]=fy(p); out[o++]=p.r*X.sc; out[o++]=1; }
+      else { out[o++]=0; out[o++]=0; out[o++]=0; out[o++]=0; }
+    }
+  }
+  return out;
+}
+function drawInst(F, data, st){
+  const n = data.length/10; if(!n) return;
+  gl.bindFramebuffer(gl.FRAMEBUFFER, F.f);
+  gl.viewport(0,0,W,H);
+  gl.useProgram(stampP.p);
+  gl.bindVertexArray(stampVAO);
+  gl.bindBuffer(gl.ARRAY_BUFFER, instBuf);
+  gl.bufferData(gl.ARRAY_BUFFER, data, gl.DYNAMIC_DRAW);
+  const u = stampP.u;
+  gl.uniform2f(u.uRes, W, H);
+  gl.uniform1f(u.uK, K); gl.uniform1f(u.uS, st.s); gl.uniform1f(u.uKmax, KMAX);
+  gl.uniform1f(u.uErase, st.erase?1:0);
+  gl.uniform1f(u.uReachAdd, st.erase ? 0 : 8/(K*st.s));
+  gl.enable(gl.BLEND); gl.blendEquation(gl.FUNC_ADD);
+  if(st.erase) gl.blendFunc(gl.ZERO, gl.ONE_MINUS_SRC_COLOR); else gl.blendFunc(gl.ONE, gl.ONE);
+  gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, n);
+  gl.disable(gl.BLEND);
+  gl.bindVertexArray(null);
+}
+function bake(st, to){
+  if(to <= st.baked) return;
+  drawInst(committed, buildInst(st, st.baked, to), st);
+  st.baked = to;
+}
+
+/* ---------------- history ---------------- */
+let hist=[], histPos=0;
+function pushHist(op){ hist.length = histPos; hist.push(op); histPos++; }
+function rebuild(){
+  if(!committed) return;
+  clearField(committed);
+  let start = 0;
+  for(let i=0;i<histPos;i++) if(hist[i].type==='clear') start=i+1;
+  for(let i=start;i<histPos;i++){ const op=hist[i]; drawInst(committed, buildInst(op,0,op.pts.length), op); }
+  // re-stamp active strokes' baked part
+  for(const pen of pens.values()){ const st=pen.stroke; const b=st.baked; st.baked=0; bake(st,b); }
+}
+function undo(){ if(histPos>0){ histPos--; rebuild(); } }
+function redo(){ if(histPos<hist.length){ const op=hist[histPos]; histPos++; if(op.type==='clear') clearField(committed); else drawInst(committed, buildInst(op,0,op.pts.length), op); } }
+function clearAll(){ pushHist({type:'clear', pts:[]}); clearField(committed); }
+
+/* ---------------- pens (strokes) ---------------- */
+const pens = new Map();
+function penDown(key, x, y, t, erase, depth=1){
+  const st = {type:'stroke', erase, pts:[], baked:0, s:sFromMerge(P.merge), sym:P.symmetry, W, H, end:P.endShape};
+  const pen = {key, st:null, stroke:st, raw:[], lastEnd:null, lastRaw:null, speed:0, rEMA:null, arc:0,
+    ph1:Math.random()*6.28, ph2:Math.random()*6.28, depth, depth0:depth};
+  pens.set(key, pen);
+  penMove(pen, x, y, t);
+}
+function emit(pen, x, y){
+  const st = pen.stroke, pts = st.pts, prev = pts[pts.length-1];
+  const ds = prev ? Math.hypot(x-prev.x, y-prev.y) : 0; pen.arc += ds;
+  const base = P.baseWidth*.5*SCALE;
+  if(st.erase){ pts.push({x, y, r:base*1.8, a:pen.arc}); return; }
+  const sp = Math.min(1, pen.speed/1600);
+  const fS = 1 + P.speedInf*(.35 - sp);
+  const nz = .6*Math.sin(pen.arc/(41*SCALE)+pen.ph1) + .4*Math.sin(pen.arc/(14*SCALE)+pen.ph2);
+  const fV = 1 + P.widthVar*.6*nz;
+  const fD = Math.min(3, Math.max(.3, Math.pow(pen.depth/pen.depth0, P.depthInf*2)));
+  const target = Math.max(.6*SCALE, base*fS*fV*fD);
+  pen.rEMA = pen.rEMA==null ? target : pen.rEMA + (target-pen.rEMA)*(1-Math.exp(-ds/(base*1.2)));
+  let r = pen.rEMA;
+  if(st.end==='wedge'){ const t=Math.min(1, pen.arc/(P.wedgeLen*base*2)); r *= Math.max(.05, Math.pow(t, P.edgeSharp*.5)); }
+  else { r *= 1 + P.dropSize*Math.exp(-Math.pow(pen.arc/(base*1.3),2)); }
+  pts.push({x, y, r, a:pen.arc});
+}
+function spacing(pen){ const l=pen.stroke.pts[pen.stroke.pts.length-1]; const r = l ? l.r : P.baseWidth*.5*SCALE; return Math.max(.9*SCALE, r*.14); }
+function emitLine(pen, a, b){
+  const L = Math.hypot(b.x-a.x, b.y-a.y), n = Math.max(1, Math.ceil(L/spacing(pen)));
+  for(let i=1;i<=n;i++){ const t=i/n; emit(pen, a.x+(b.x-a.x)*t, a.y+(b.y-a.y)*t); }
+}
+function penMove(pen, x, y, t){
+  if(pen.lastRaw){
+    const d = Math.hypot(x-pen.lastRaw.x, y-pen.lastRaw.y);
+    const dt = Math.max(1e-3, (t-pen.lastRaw.t)/1000);
+    pen.speed += (d/dt/SCALE - pen.speed)*(1-Math.exp(-dt/.09));
+    if(d < .6*SCALE) return;
+  }
+  pen.lastRaw = {x,y,t};
+  const raw = pen.raw; raw.push({x,y});
+  if(raw.length > 4) raw.shift();
+  const n = raw.length;
+  if(!pen.lastEnd){ emit(pen, x, y); pen.lastEnd={x,y}; return; }
+  const c = raw[n-2], e = {x:(raw[n-2].x+x)/2, y:(raw[n-2].y+y)/2}, s0 = pen.lastEnd;
+  const L = Math.hypot(c.x-s0.x,c.y-s0.y) + Math.hypot(e.x-c.x,e.y-c.y);
+  const steps = Math.max(1, Math.ceil(L/spacing(pen)));
+  for(let i=1;i<=steps;i++){
+    const tt=i/steps, u=1-tt;
+    emit(pen, u*u*s0.x + 2*u*tt*c.x + tt*tt*e.x, u*u*s0.y + 2*u*tt*c.y + tt*tt*e.y);
+  }
+  pen.lastEnd = e;
+  maybeBake(pen);
+}
+function keepLen(){ const base=P.baseWidth*.5*SCALE; return Math.max(P.wedgeLen*base*2, base*4) + 8*SCALE; }
+function maybeBake(pen){
+  const st = pen.stroke, pts = st.pts;
+  if(st.erase){ bake(st, pts.length); return; }
+  const keep = keepLen(); let m = pts.length;
+  while(m > st.baked && pen.arc - pts[m-1].a < keep) m--;
+  if(m - st.baked >= 12) bake(st, m);
+}
+function penUp(pen){
+  const st = pen.stroke;
+  if(pen.lastRaw && pen.lastEnd) emitLine(pen, pen.lastEnd, pen.lastRaw);
+  if(!st.erase){
+    const base=P.baseWidth*.5*SCALE, tl=P.wedgeLen*base*2, total=pen.arc;
+    for(let i=st.pts.length-1;i>=st.baked;i--){
+      const q=st.pts[i], d=total-q.a;
+      if(st.end==='wedge'){ if(d>tl) break; q.r *= Math.max(.05, Math.pow(d/tl, P.edgeSharp*.5)); }
+      else { if(d>base*4) break; q.r *= 1 + P.dropSize*Math.exp(-Math.pow(d/(base*1.3),2)); }
+    }
+  }
+  bake(st, st.pts.length);
+  pens.delete(pen.key);
+  if(st.pts.length) pushHist(st);
+}
+function drawLive(){
+  clearField(live);
+  for(const pen of pens.values()){
+    const st=pen.stroke; if(st.erase || st.baked>=st.pts.length) continue;
+    drawInst(live, buildInst(st, st.baked, st.pts.length), st);
+  }
+}
+
+/* ---------------- one-euro filter ---------------- */
+class OneEuro{
+  constructor(){ this.y=null; this.dy=0; this.t=null; }
+  f(x, t, minCut, beta){
+    if(this.y===null){ this.y=x; this.t=t; return x; }
+    const dt=Math.max(1e-3,(t-this.t)/1000); this.t=t;
+    const a=c=>{ const tau=1/(2*Math.PI*c); return 1/(1+tau/dt); };
+    const dx=(x-this.y)/dt; this.dy += a(1.2)*(dx-this.dy);
+    const cut=minCut+beta*Math.abs(this.dy);
+    this.y += a(cut)*(x-this.y); return this.y;
+  }
+  reset(){ this.y=null; this.dy=0; this.t=null; }
+}
+
+/* ---------------- camera + mediapipe ---------------- */
+let stream=null, hasVid=false, landmarker=null, mpLoading=false, lastVT=-1;
+const hands = new Map();
+async function startCamera(){
+  try{
+    if(stream) stream.getTracks().forEach(t=>t.stop());
+    const M = CAM_MODES[P.camMode];
+    const v = {width:{ideal:M[0]}, height:{ideal:M[1]}, frameRate:{ideal:P.camFps}, resizeMode:{ideal:'none'}};
+    if(M[2]) v.aspectRatio = {ideal:M[0]/M[1]};
+    if(P.camId) v.deviceId = {exact:P.camId}; else v.facingMode='user';
+    try{ stream = await navigator.mediaDevices.getUserMedia({video:v, audio:false}); }
+    catch(e){ delete v.resizeMode; delete v.aspectRatio; stream = await navigator.mediaDevices.getUserMedia({video:v, audio:false}); }
+    video.srcObject = stream; await video.play();
+    hasVid = true; $('hint').style.display='none';
+    const s = stream.getVideoTracks()[0].getSettings();
+    const ca = W/H, va = s.width/s.height, crop = Math.abs(va-ca)/ca > .02;
+    $('stCam').textContent = `CAM ${s.width}×${s.height}${s.frameRate?' @'+Math.round(s.frameRate):''}${crop && P.camFit==='fill' ? ' · CROPPED ('+ratioName(va)+' → '+P.aspect+')' : ''}`;
+    if(crop && P.camFit==='fill') toast(`Camera gives ${s.width}×${s.height} (${ratioName(va)}) — frame is ${P.aspect}, so it is cropped. Use Fit: Whole frame or change Frame.`, 6500);
+    await listCams(s.deviceId);
+    $('camBtn') && ($('camBtn').textContent='Restart camera');
+    initHands();
+  }catch(e){ console.error(e); toast('Camera error: '+e.message, 5000); }
+}
+async function listCams(cur){
+  const sel = $('ctl_camId'); if(!sel) return;
+  const devs = (await navigator.mediaDevices.enumerateDevices()).filter(d=>d.kind==='videoinput');
+  sel.innerHTML=''; devs.forEach((d,i)=>{ const o=document.createElement('option'); o.value=d.deviceId; o.textContent=d.label||('Camera '+(i+1)); if(d.deviceId===cur) o.selected=true; sel.appendChild(o); });
+}
+async function initHands(){
+  if(landmarker || mpLoading) return; mpLoading=true;
+  $('stHands').textContent='HANDS loading…';
+  try{
+    const vision = await import(MP_URL);
+    const fs = await vision.FilesetResolver.forVisionTasks(MP_WASM);
+    const opts = d => ({baseOptions:{modelAssetPath:MP_MODEL, delegate:d}, runningMode:'VIDEO', numHands:2,
+      minHandDetectionConfidence:.5, minHandPresenceConfidence:.5, minTrackingConfidence:.5});
+    try{ landmarker = await vision.HandLandmarker.createFromOptions(fs, opts('GPU')); }
+    catch(e){ console.warn('GPU delegate failed, CPU', e); landmarker = await vision.HandLandmarker.createFromOptions(fs, opts('CPU')); }
+    $('stHands').textContent='HANDS ready'; toast('Hand tracking ready — pinch to draw');
+  }catch(e){ console.error(e); $('stHands').textContent='HANDS error'; toast('MediaPipe failed to load (needs internet). Mouse still works.', 6000); }
+  mpLoading=false;
+}
+const CAM_MODES = {max:[3840,2160,false], '4k':[3840,2160,true], '1080':[1920,1080,true], 'v4k':[1728,3072,true], 'v1080':[1080,1920,true], '720':[1280,720,true]};
+function ratioName(r){ const L=[[16/9,'16:9'],[4/3,'4:3'],[9/16,'9:16'],[3/4,'3:4'],[1,'1:1'],[16/10,'16:10']]; let b=L[0]; for(const x of L) if(Math.abs(x[0]-r)<Math.abs(b[0]-r)) b=x; return b[1]; }
+function vidScale(){
+  const vw=video.videoWidth||16, vh=video.videoHeight||9, va=vw/vh, ca=W/H;
+  let s;
+  if(P.camFit==='fit') s = va>ca ? [1, va/ca] : [ca/va, 1];
+  else s = va>ca ? [ca/va, 1] : [1, va/ca];
+  return [s[0]/P.camZoom, s[1]/P.camZoom];
+}
+async function useDJI(){
+  if(!stream){ await startCamera(); }
+  const devs = (await navigator.mediaDevices.enumerateDevices()).filter(d=>d.kind==='videoinput');
+  const d = devs.find(d=>/dji|osmo|pocket/i.test(d.label));
+  if(!d){ toast('DJI not found. Connect Pocket 4 by USB-C, choose Webcam on its screen, then press again.', 7000); return; }
+  Object.assign(P, {camId:d.deviceId, camMode: P.aspect==='9:16' ? 'v4k' : '4k', camFps:30});
+  ['camMode','camFps'].forEach(refresh);
+  await startCamera();
+}
+function lmToCanvas(l){
+  const [sx,sy]=vidScale();
+  let ux = P.mirror ? 1-l.x : l.x;
+  return [ (.5 + (ux-.5)/sx)*W, (.5 + (l.y-.5)/sy)*H ];
+}
+function processHands(now){
+  if(!landmarker || !hasVid || video.readyState<2) return;
+  if(video.currentTime===lastVT) return; lastVT=video.currentTime;
+  let res; try{ res = landmarker.detectForVideo(video, now); }catch(e){ return; }
+  const ar = (video.videoWidth||16)/(video.videoHeight||9);
+  const seen = new Set();
+  const minCut = 4.2 - 3.8*P.stabilize, beta = .006/SCALE;
+  (res.landmarks||[]).forEach((lm,i)=>{
+    const hd = res.handedness || res.handednesses; const lab = hd?.[i]?.[0]?.categoryName || 'X';
+    let side = lab==='Left' ? 'R' : lab==='Right' ? 'L' : 'X';
+    let key = 'h'+side; if(seen.has(key)) key += i; seen.add(key);
+    let hs = hands.get(key);
+    if(!hs){ hs={pinch:false, off:0, fx:new OneEuro(), fy:new OneEuro(), side}; hands.set(key,hs); }
+    hs.last=now; hs.lm=lm; hs.side=side;
+    const dd=(a,b)=>Math.hypot((lm[a].x-lm[b].x)*ar, lm[a].y-lm[b].y);
+    const size = Math.max(1e-4, dd(0,9));
+    const ratio = dd(4,8)/size;
+    if(!hs.pinch){ if(ratio < P.pinchTh){ hs.pinch=true; hs.off=0; } }
+    else { if(ratio > P.pinchTh*1.45){ if(++hs.off>=2) hs.pinch=false; } else hs.off=0; }
+    const mid = {x:(lm[4].x+lm[8].x)/2, y:(lm[4].y+lm[8].y)/2};
+    let [x,y] = lmToCanvas(mid);
+    x = hs.fx.f(x, now, minCut, beta); y = hs.fy.f(y, now, minCut, beta);
+    hs.x=x; hs.y=y; hs.size=size;
+    let role='draw';
+    if(P.roles==='rl') role = side==='L' ? 'erase' : 'draw';
+    if(P.roles==='r' && side==='L') role='none';
+    if(P.mode==='erase' && role!=='none') role='erase';
+    hs.role=role;
+    const pen = pens.get(key);
+    if(hs.pinch && role!=='none'){
+      if(!pen) penDown(key, x, y, now, role==='erase', size); else { pen.depth=size; penMove(pen, x, y, now); }
+    } else if(pen) penUp(pen);
+  });
+  for(const [key,hs] of hands){
+    if(!seen.has(key) && now-hs.last>220){ const pen=pens.get(key); if(pen) penUp(pen); hands.delete(key); }
+  }
+  $('stHands').textContent = `HANDS ${seen.size}`;
+}
+
+/* ---------------- mouse fallback ---------------- */
+function evXY(e){ const r=ov.getBoundingClientRect(); return [(e.clientX-r.left)/r.width*W, (e.clientY-r.top)/r.height*H]; }
+let mouseXY=null;
+ov.addEventListener('pointerdown', e=>{ ov.setPointerCapture(e.pointerId); $('hint').style.display='none'; const [x,y]=evXY(e); penDown('mouse', x, y, performance.now(), P.mode==='erase'); });
+ov.addEventListener('pointermove', e=>{ const [x,y]=evXY(e); mouseXY=[x,y]; const p=pens.get('mouse'); if(p) penMove(p,x,y,performance.now()); });
+const mUp = ()=>{ const p=pens.get('mouse'); if(p) penUp(p); };
+ov.addEventListener('pointerup', mUp); ov.addEventListener('pointercancel', mUp);
+ov.addEventListener('pointerleave', ()=>{ mouseXY=null; });
+
+/* ---------------- overlay ---------------- */
+const CONN=[[0,1],[1,2],[2,3],[3,4],[0,5],[5,6],[6,7],[7,8],[5,9],[9,10],[10,11],[11,12],[9,13],[13,14],[14,15],[15,16],[13,17],[17,18],[18,19],[19,20],[0,17]];
+function drawOverlay(){
+  const s = ov.width/W;
+  octx.clearRect(0,0,ov.width,ov.height);
+  const base = P.baseWidth*.5*SCALE*s;
+  for(const hs of hands.values()){
+    if(P.skeleton && hs.lm){
+      octx.strokeStyle='rgba(255,255,255,.55)'; octx.lineWidth=1.2*devicePixelRatio;
+      octx.beginPath();
+      for(const [a,b] of CONN){ const [ax,ay]=lmToCanvas(hs.lm[a]), [bx,by]=lmToCanvas(hs.lm[b]); octx.moveTo(ax*s,ay*s); octx.lineTo(bx*s,by*s); }
+      octx.stroke();
+    }
+    if(hs.x==null || hs.role==='none') continue;
+    cursor(hs.x*s, hs.y*s, base, hs.pinch, hs.role==='erase');
+  }
+  if(mouseXY && !pens.has('mouse')) cursor(mouseXY[0]*s, mouseXY[1]*s, base, false, P.mode==='erase');
+}
+function cursor(x,y,r,on,er){
+  const rr = er ? r*1.8 : Math.max(4, r);
+  octx.lineWidth=1.5*devicePixelRatio;
+  octx.strokeStyle = er ? '#ff2b2b' : '#fff';
+  octx.fillStyle = er ? 'rgba(255,43,43,.25)' : 'rgba(255,255,255,.28)';
+  octx.beginPath(); octx.arc(x,y,rr,0,Math.PI*2); if(on) octx.fill(); octx.stroke();
+  octx.strokeStyle='rgba(0,0,0,.5)'; octx.lineWidth=1*devicePixelRatio;
+  octx.beginPath(); octx.arc(x,y,rr+1.5*devicePixelRatio,0,Math.PI*2); octx.stroke();
+}
+
+/* ---------------- render ---------------- */
+const hex3 = h => { const n=parseInt(h.slice(1),16); return [(n>>16&255)/255,(n>>8&255)/255,(n&255)/255].map(c=>Math.pow(c,1)); };
+let lightOff=0, tPrev=performance.now(), fpsAcc=0, fpsN=0, fpsT=0;
+function composite(transparent=false, time=0){
+  gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+  gl.viewport(0,0,W,H);
+  gl.useProgram(compP.p);
+  gl.bindVertexArray(fsVAO);
+  const u=compP.u;
+  gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, committed.t); gl.uniform1i(u.uF0,0);
+  gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, live.t); gl.uniform1i(u.uF1,1);
+  gl.activeTexture(gl.TEXTURE2); gl.bindTexture(gl.TEXTURE_2D, vidTex); gl.uniform1i(u.uVid,2);
+  gl.uniform2f(u.uRes, W, H);
+  const [sx,sy]=vidScale(); gl.uniform2f(u.uVidScale, sx, sy);
+  gl.uniform1f(u.uK, K);
+  gl.uniform1f(u.uHasVid, hasVid?1:0);
+  gl.uniform1f(u.uBgMode, {camera:0, mono:1, solid:2}[P.bg]);
+  gl.uniform1f(u.uDim, P.camDim); gl.uniform1f(u.uMirror, P.mirror?1:0);
+  gl.uniform1f(u.uTransparent, transparent?1:0);
+  gl.uniform3fv(u.uBgColor, hex3(P.bgColor));
+  gl.uniform3fv(u.uC0, hex3(P.shadow)); gl.uniform3fv(u.uC1, hex3(P.mid)); gl.uniform3fv(u.uC2, hex3(P.high));
+  gl.uniform1f(u.uLight, (P.lightAngle+lightOff)*Math.PI/180);
+  gl.uniform1f(u.uVol, P.volume); gl.uniform1f(u.uRefl, P.reflContrast); gl.uniform1f(u.uSharp, P.breakSharp);
+  gl.uniform1f(u.uStyle, {metal:0, outline:1, puff:2, gloss:3}[P.style]); gl.uniform3fv(u.uLine, hex3(P.lineColor));
+  gl.uniform1f(u.uS, sFromMerge(P.merge)); gl.uniform1f(u.uLineW, P.lineW); gl.uniform1f(u.uWob, P.wob); gl.uniform1f(u.uWobSpd, P.wobSpd); gl.uniform1f(u.uHollow, (P.style==='outline'&&P.hollow)?1:0);
+  gl.uniform1f(u.uTexType, P.texType==='foam'?0:1); gl.uniform1f(u.uTexAmt, P.texAmt); gl.uniform1f(u.uTexScale, P.texScale); gl.uniform1f(u.uAO, P.ao);
+  gl.uniform1f(u.uFilmSize, P.filmSize*Math.max(1,Math.round(SCALE)));
+  gl.uniform1f(u.uSeed, P.grainAnim ? (Math.floor(time*24)*61.803)%97.0 : 0.0);
+  gl.uniform1f(u.uGrit, P.grit); gl.uniform1f(u.uFilm, P.film); gl.uniform1f(u.uDither, P.dither); gl.uniform1f(u.uChroma, P.chroma);
+  gl.uniform1f(u.uRough, P.roughness); gl.uniform1f(u.uShine, P.shine); gl.uniform1f(u.uIrid, P.irid);
+  gl.uniform1f(u.uShadowOp, P.shadowOp); gl.uniform1f(u.uShadowDist, P.shadowDist); gl.uniform1f(u.uScale, SCALE);
+  gl.uniform1f(u.uTime, time);
+  gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
+  gl.bindVertexArray(null);
+}
+function evaporate(dt){
+  if(P.evaporate<=0) return;
+  const f = Math.exp(-K*P.evaporate*SCALE*dt);
+  gl.bindFramebuffer(gl.FRAMEBUFFER, committed.f); gl.viewport(0,0,W,H);
+  gl.useProgram(fadeP.p); gl.bindVertexArray(fsVAO);
+  const fg = Math.exp(-P.evaporate*dt/(P.baseWidth*.5)); gl.enable(gl.BLEND); gl.blendColor(f,fg,1,1); gl.blendFunc(gl.ZERO, gl.CONSTANT_COLOR);
+  gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
+  gl.disable(gl.BLEND); gl.bindVertexArray(null);
+}
+function frame(now){
+  const dt = Math.min(.1, (now-tPrev)/1000); tPrev=now;
+  processHands(now);
+  if(P.lightSpin) lightOff = (lightOff + P.lightSpin*dt) % 360;
+  evaporate(dt);
+  drawLive();
+  if(hasVid && video.readyState>=2){
+    gl.bindTexture(gl.TEXTURE_2D, vidTex);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+    gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,video);
+  }
+  composite(false, now/1000);
+  drawOverlay();
+  fpsAcc+=dt; fpsN++; if(now-fpsT>500){ $('stFps').textContent=Math.round(fpsN/fpsAcc)+' FPS'; fpsAcc=0; fpsN=0; fpsT=now; }
+  if(rec) $('rectime').textContent = fmtTime((now-recT0)/1000);
+  requestAnimationFrame(frame);
+}
+
+/* ---------------- recording / export ---------------- */
+let rec=null, recChunks=[], recT0=0, recMime='';
+const fmtTime = s => `${String(Math.floor(s/60)).padStart(2,'0')}:${String(Math.floor(s%60)).padStart(2,'0')}`;
+const stamp = () => { const d=new Date(), z=n=>String(n).padStart(2,'0'); return `${d.getFullYear()}${z(d.getMonth()+1)}${z(d.getDate())}-${z(d.getHours())}${z(d.getMinutes())}${z(d.getSeconds())}`; };
+function pickMime(){
+  const list=['video/mp4;codecs=avc1.640033','video/mp4;codecs=avc1.4d0033','video/mp4;codecs=avc1','video/mp4','video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm'];
+  return list.find(m=>window.MediaRecorder && MediaRecorder.isTypeSupported(m)) || '';
+}
+function download(url, name){ const a=document.createElement('a'); a.href=url; a.download=name; document.body.appendChild(a); a.click(); a.remove(); }
+function toggleRec(){
+  if(rec){ rec.stop(); return; }
+  recMime = pickMime();
+  const st = cv.captureStream(P.fps);
+  try{ rec = new MediaRecorder(st, {mimeType:recMime||undefined, videoBitsPerSecond:P.bitrate*1e6}); }
+  catch(e){ toast('Recorder error: '+e.message, 5000); rec=null; return; }
+  recChunks=[];
+  rec.ondataavailable = e=>{ if(e.data && e.data.size) recChunks.push(e.data); };
+  rec.onstop = ()=>{
+    const type = rec.mimeType || recMime || 'video/webm';
+    const blob = new Blob(recChunks, {type});
+    const ext = type.includes('mp4') ? 'mp4' : 'webm';
+    const url = URL.createObjectURL(blob), name = `kinetic-metal-${stamp()}.${ext}`;
+    const dur = (performance.now()-recT0)/1000;
+    const a = document.createElement('a'); a.href=url; a.download=name;
+    a.innerHTML = `<span>↓ ${name.replace('kinetic-metal-','')}</span><b>${fmtTime(dur)} · ${(blob.size/1048576).toFixed(1)}MB</b>`;
+    $('recs').prepend(a);
+    download(url, name);
+    rec=null; $('recBtn').classList.remove('on'); $('recBtn').textContent='● Record'; $('recbadge').style.display='none';
+    toast(`Saved ${name}`);
+  };
+  rec.start(250); recT0=performance.now();
+  $('recBtn').classList.add('on'); $('recBtn').textContent='■ Stop'; $('recbadge').style.display='flex';
+  toast(`Recording ${W}×${H} · ${P.fps}fps · ${(recMime||'default').split(';')[0]}`);
+}
+function exportPNG(){
+  const alpha = $('pngAlpha').checked;
+  composite(alpha, performance.now()/1000);
+  cv.toBlob(b=>{ download(URL.createObjectURL(b), `kinetic-metal-${stamp()}.png`); }, 'image/png');
+}
+
+/* ---------------- UI builder ---------------- */
+const pb = $('pbody'); const ctl = {};
+const el = (t, cls, html) => { const e=document.createElement(t); if(cls) e.className=cls; if(html!=null) e.innerHTML=html; return e; };
+function onSet(k){
+  if(k==='res' || k==='aspect') setOutput();
+  if(k==='camId' || ((k==='camMode'||k==='camFps') && stream)) startCamera();
+  if(['shadow','mid','high','irid','lineColor'].includes(k)){ P.preset=''; refresh('preset'); }
+  if(k==='style') switchStyle();
+}
+function set(k, v){ P[k]=v; refresh(k); onSet(k); }
+function refresh(k){ ctl[k] && ctl[k](); }
+function range(k, label, min, max, step, fmt=v=>v){
+  const r=el('div','row'), lab=el('div','lab',`<span>${label}</span><b></b>`), i=el('input');
+  i.type='range'; i.min=min; i.max=max; i.step=step;
+  i.oninput=()=>{ P[k]=+i.value; lab.querySelector('b').textContent=fmt(P[k]); onSet(k); };
+  ctl[k]=()=>{ i.value=P[k]; lab.querySelector('b').textContent=fmt(P[k]); }; ctl[k]();
+  r.append(lab,i); return r;
+}
+function seg(k, label, opts){
+  const r=el('div','row'); if(label) r.append(el('div','lab',`<span>${label}</span>`));
+  const s=el('div','seg'); const bs=opts.map(([v,t])=>{ const b=el('button',null,t); b.onclick=()=>set(k,v); s.append(b); return [v,b]; });
+  ctl[k]=()=>bs.forEach(([v,b])=>b.classList.toggle('on', P[k]===v)); ctl[k]();
+  r.append(s); return r;
+}
+function check(k, label){
+  const l=el('label','chk'); const i=el('input'); i.type='checkbox';
+  i.onchange=()=>{ P[k]=i.checked; onSet(k); };
+  ctl[k]=()=>{ i.checked=!!P[k]; }; ctl[k]();
+  l.append(i, document.createTextNode(label)); return l;
+}
+function colors(keys){
+  const r=el('div','row cols');
+  for(const [k,label] of keys){
+    const c=el('div','col'), sw=el('div','sw'), i=el('input'), hx=el('input','hex');
+    i.type='color'; hx.maxLength=7;
+    i.oninput=()=>{ P[k]=i.value; sw.style.background=i.value; hx.value=i.value; onSet(k); };
+    hx.onchange=()=>{ let v=hx.value.trim(); if(!v.startsWith('#')) v='#'+v; if(/^#[0-9a-f]{6}$/i.test(v)){ P[k]=v.toLowerCase(); refresh(k); onSet(k);} else refresh(k); };
+    const prevC = ctl[k]; ctl[k]=()=>{ prevC && prevC(); i.value=P[k]; hx.value=P[k]; sw.style.background=P[k]; }; ctl[k]();
+    sw.append(i); c.append(sw, hx, el('div','cl',label)); r.append(c);
+  }
+  return r;
+}
+function section(title, ...items){ const s=el('section','sec'); s.append(el('div','sec-t',title), ...items); pb.append(s); return s; }
+
+// Camera
+const camBtn = el('button','btn','Start camera'); camBtn.id='camBtn'; camBtn.onclick=startCamera;
+const camSel = el('select'); camSel.id='ctl_camId'; camSel.onchange=()=>set('camId', camSel.value);
+const camRow = el('div','row'); camRow.append(el('div','lab','<span>Device</span>'), camSel);
+const djiBtn = el('button','btn ghost','Use DJI Osmo Pocket 4'); djiBtn.onclick=useDJI; camRow.append(el('div',null,'<div style="height:6px"></div>'), djiBtn,
+  el('div','note','Pocket 4: USB-C → on the camera screen choose Webcam. Max over USB is 4K / 1080 at 30 fps.'));
+section('Camera', el('div','row').appendChild(camBtn).parentNode, camRow,
+  seg('camMode','Camera resolution',[['4k','4K'],['1080','1080'],['v4k','4K ▯'],['v1080','1080 ▯']]),
+  seg('camFps','Camera fps',[[30,'30'],[60,'60']]),
+  seg('camFit','Fit',[['fill','Fill (crop)'],['fit','Whole frame']]),
+  range('camZoom','Camera zoom',1,3,.01,v=>v.toFixed(2)+'×'),
+  seg('bg','Background',[['camera','Camera'],['mono','Mono'],['solid','Solid']]),
+  range('camDim','Camera dim',0,.9,.01,v=>v.toFixed(2)),
+  colors([['bgColor','Solid bg']]),
+  check('mirror','Mirror camera'));
+// Output
+section('Output',
+  seg('res','Resolution',[['fhd','1080'],['2k','1440'],['4k','2160 · 4K']]),
+  seg('aspect','Frame',[['16:9','16:9'],['9:16','9:16'],['1:1','1:1'],['4:5','4:5']]),
+  seg('fps','Record fps',[[30,'30'],[60,'60']]),
+  range('bitrate','Bitrate',8,100,1,v=>v+' Mbps'),
+  el('div','note','Resolution = short side. Camera is upscaled if it is lower; the metal is always rendered natively at full output resolution.'));
+// Hands
+section('Hands',
+  seg('roles','Roles',[['both','Both'],['rl','L = erase'],['r','Right only']]),
+  range('pinchTh','Pinch sensitivity',.12,.55,.01,v=>v.toFixed(2)),
+  range('stabilize','Stabilizer',0,1,.01,v=>v.toFixed(2)),
+  range('depthInf','Depth → width',0,1,.01,v=>v.toFixed(2)),
+  check('skeleton','Show hand skeleton (not recorded)'));
+// Tool
+section('Tool',
+  seg('mode',null,[['brush','Brush'],['erase','Eraser']]),
+  seg('endShape','End shape',[['drop','Drop'],['wedge','Wedge']]));
+// Style
+let curStyle = P.style;
+const styleSec = section('Style',
+  seg('style',null,[['metal','Metal'],['outline','Outline'],['gloss','Gloss 3D']]),
+  el('div','note','Metal & Gloss merge on touch. Outline = flat fill + contour that merges. The drawing is kept when you switch.'));
+pb.prepend(styleSec);
+// Palette
+const pr = el('div','presets');
+const prBtns = Object.entries(PRESETS).map(([k,v])=>{
+  const b=el('button');
+  b.style.background = v.st==='outline' ? `radial-gradient(circle at 50% 50%, ${v.mid} 0 46%, ${v.lineColor} 47% 62%, #e9e7e2 63%)`
+    : `linear-gradient(135deg, ${v.shadow} 0 30%, ${v.mid} 30% 62%, ${v.high} 62%)`;
+  if(v.irid>.5) b.style.background=`linear-gradient(135deg,#1b1b24 0 25%,#8fd3ff 25% 45%,#ffb3f0 45% 65%,#fff6b0 65%)`;
+  b.append(el('span',null,v.n));
+  b.onclick=()=>{ const {st,n,...vals}=v; Object.assign(P, vals); Object.keys(vals).forEach(refresh); P.preset=k; refresh('preset'); };
+  pr.append(b); return [k,b,v.st];
+});
+ctl.preset=()=>prBtns.forEach(([k,b,st])=>{ b.classList.toggle('on', P.preset===k); b.style.display = st===P.style ? '' : 'none'; }); ctl.preset();
+const col3 = colors([['shadow','Shadow'],['mid','Midtone'],['high','Highlight']]);
+const colO = colors([['mid','Fill'],['lineColor','Outline']]);
+const iridRow = range('irid','Iridescence',0,1,.01,v=>v.toFixed(2));
+const palSec = section('Color', pr, col3, colO, iridRow);
+// Outline
+const outSec = section('Outline',
+  range('lineW','Outline width',0,30,.5,v=>v+' px'),
+  range('wob','Contour wobble',0,1,.01,v=>v.toFixed(2)),
+  range('wobSpd','Wobble speed',0,2,.01,v=>v?v.toFixed(2):'static'),
+  check('hollow','Outline only (no fill)'),
+  el('div','note','Shapes merge into one contour when they touch — Merge radius controls how early.'));
+function updateStyleUI(){
+  const st = P.style;
+  col3.style.display = st==='outline' ? 'none' : '';
+  colO.style.display = st==='outline' ? '' : 'none';
+  iridRow.style.display = st==='outline' ? 'none' : '';
+  outSec.style.display = st==='outline' ? '' : 'none';
+  ctl.preset();
+}
+function switchStyle(){
+  if(curStyle===P.style) return;
+  const save = {}; STYLE_KEYS.forEach(k=>save[k]=P[k]); styleState[curStyle] = Object.assign(styleState[curStyle]||{}, save);
+  Object.assign(P, styleState[P.style]||{});
+  STYLE_KEYS.forEach(refresh);
+  curStyle = P.style;
+  updateStyleUI();
+}
+// Brush
+section('Brush',
+  range('baseWidth','Base width',3,90,1),
+  range('widthVar','Width variation',0,1,.01,v=>v.toFixed(2)),
+  range('speedInf','Speed influence',0,1,.01,v=>v.toFixed(2)),
+  range('merge','Merge radius',0,40,1),
+  el('div','note','Width / merge apply to new strokes. Material settings re-render everything live.'));
+// Material
+section('Material',
+  range('shine','Shine',0,1.5,.01,v=>v.toFixed(2)),
+  range('lightAngle','Light angle',0,360,1,v=>v+'°'),
+  range('lightSpin','Light rotation',-120,120,1,v=>v+'°/s'),
+  range('volume','Volume',.1,2,.01,v=>v.toFixed(2)),
+  range('reflContrast','Reflection contrast',0,1,.01,v=>v.toFixed(2)),
+  range('breakSharp','Highlight break sharpness',0,1,.01,v=>v.toFixed(2)),
+
+  range('shadowOp','Drop shadow',0,1,.01,v=>v.toFixed(2)),
+  range('shadowDist','Shadow distance',0,40,1));
+// Noise & texture
+section('Noise & texture',
+  range('roughness','Grain',0,2,.01,v=>v.toFixed(2)),
+  check('grainAnim','Animated grain (film boil)'),
+  range('grit','Edge grit',0,1,.01,v=>v.toFixed(2)),
+  range('dither','Dither (1-bit print)',0,1,.01,v=>v.toFixed(2)),
+  range('film','Film grain (whole frame)',0,1,.01,v=>v.toFixed(2)),
+  range('filmSize','Film grain size',1,8,1,v=>v+' px'),
+  range('chroma','Chromatic split',0,12,.5,v=>v+' px'));
+// Ends
+section('Ends',
+  range('wedgeLen','Wedge length',.3,5,.05,v=>v.toFixed(2)),
+  range('edgeSharp','Edge sharpness',.3,4,.05,v=>v.toFixed(2)),
+  range('dropSize','Drop size',0,1.5,.01,v=>v.toFixed(2)));
+// Symmetry / life
+section('Symmetry', seg('symmetry',null,[['none','None'],['v','Vertical'],['h','Horizontal'],['both','Both']]));
+section('Life', range('evaporate','Evaporate',0,60,1,v=>v?v+' px/s':'off'),
+  el('div','note','Strokes melt / thin out over time. Great for long live recordings.'));
+
+$('hintCam').onclick=startCamera;
+$('recBtn').onclick=toggleRec; $('pngBtn').onclick=exportPNG;
+$('clrBtn').onclick=clearAll; $('undoBtn').onclick=undo; $('redoBtn').onclick=redo;
+addEventListener('keydown', e=>{
+  if(e.target.tagName==='INPUT' && e.target.type!=='range' && e.target.type!=='checkbox') return;
+  if(e.target.tagName==='SELECT') return;
+  const k=e.key.toLowerCase();
+  if(k==='z' && (e.metaKey||e.ctrlKey) && e.shiftKey){ redo(); e.preventDefault(); }
+  else if(k==='z'){ undo(); e.preventDefault(); }
+  else if(k==='x') redo();
+  else if(k==='r'){ toggleRec(); }
+  else if(k==='e') set('mode','erase');
+  else if(k==='b') set('mode','brush');
+  else if(k==='p') exportPNG();
+  else if(k==='h'){ $('panel').classList.toggle('hide'); layout(); }
+});
+
+updateStyleUI();
+setOutput();
+requestAnimationFrame(frame);
+window.__km = {P, set, pens, penDown, penMove, penUp, hist:()=>hist, undo, W:()=>[W,H]};
+</script>
+</body>
+</html>
